@@ -8,44 +8,12 @@ import os
 warnings.filterwarnings("ignore", category=UserWarning)
 
 # ==================== КОНФИГ ====================
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 900
-SCREEN_TITLE = "🧬 Эволюция"
-FPS = 60
-
-ROWS, COLS = 4, 4
-TILE_MARGIN = 15
-TILE_SIZE = (SCREEN_WIDTH - TILE_MARGIN * (COLS + 1)) // COLS
-CELL_STEP = TILE_SIZE + TILE_MARGIN
-
-GRID_ORIGIN_X = TILE_MARGIN
-GRID_ORIGIN_Y = SCREEN_HEIGHT - TILE_MARGIN
-
-COLORS = {
-    "background": arcade.color.ECRU,
-    "grid": arcade.color.BROWN,
-    "text": arcade.color.DARK_BROWN,
-}
-
-EVOLUTION_CHAIN = [
-    {"name": "Амеба", "image": "assets/amoeba.png"},
-    {"name": "Рыба", "image": "assets/fish.png"},
-    {"name": "Лягушка", "image": "assets/frog.png"},
-    {"name": "Ящерица", "image": "assets/lizard.png"},
-    {"name": "Птица", "image": "assets/bird.png"},
-    {"name": "Заяц", "image": "assets/hare.png"},
-    {"name": "Волк", "image": "assets/wolf.png"},
-    {"name": "Медведь", "image": "assets/bear.png"},
-    {"name": "Человек", "image": "assets/human.png"},
-    {"name": "Киборг", "image": "assets/cyborg.png"},
-]
-
-BG_COLORS = [
-    (100, 200, 255), (100, 150, 255), (100, 255, 150),
-    (150, 255, 100), (255, 255, 100), (255, 200, 100),
-    (255, 150, 100), (255, 100, 100), (255, 100, 200),
-    (200, 100, 255)
-]
+from config import (
+    SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, FPS,
+    ROWS, COLS, TILE_MARGIN, TILE_SIZE, CELL_STEP,
+    GRID_ORIGIN_X, GRID_ORIGIN_Y, COLORS
+)
+from src.game.evolution_chain import EVOLUTION_CHAIN, BG_COLORS
 
 # Глобальная ссылка на GameView для звуков
 _game_view_ref = None
