@@ -178,6 +178,8 @@ class GameBoard:
         self.spawn_pending = False
         self.wait_counter = 0
         self.max_wait_frames = 120
+        self.timer = 60.0  # Начальное время в секундах
+        self.merges_this_move = 0  # Счётчик слияний за текущий ход
 
     def add_random_tile(self, animate: bool = True) -> bool:
         empty = [(r, c) for r in range(ROWS) for c in range(COLS)
@@ -224,6 +226,7 @@ class GameBoard:
                 last.stage_index += 1
                 last.on_merge()
                 self.score += 2 ** (last.stage_index + 1)
+                self.merges_this_move += 1  # Увеличиваем счётчик слияний за ход
                 merged_keys.add(last.get_key())
 
                 new_texture = EVOLUTION_TEXTURES[last.stage_index]
@@ -319,6 +322,10 @@ class GameBoard:
 
     def _force_finish_move(self):
         if self.spawn_pending:
+            # Добавляем время за слияния: по 2 секунды за каждое слияние
+            time_bonus = self.merges_this_move * 2.0
+            self.timer += time_bonus
+            self.merges_this_move = 0  # Сбрасываем счётчик слияний
             self.add_random_tile(animate=True)
             self.spawn_pending = False
             self._check_game_state()
@@ -354,6 +361,8 @@ class GameBoard:
         self.game_over = self.won = False
         self.input_locked = self.spawn_pending = False
         self.wait_counter = 0
+        self.timer = 60.0  # Сбрасываем таймер до начального значения
+        self.merges_this_move = 0  # Сбрасываем счётчик слияний
         for _ in range(2):
             self.add_random_tile(animate=True)
 
@@ -537,6 +546,11 @@ class GameView(arcade.View):
         arcade.draw_text(f"Счёт: {self.board.score}", 25, SCREEN_HEIGHT - 25,
                         COLORS["text"], font_size=20, bold=True)
 
+        # Таймер
+        timer_color = arcade.color.RED if self.board.timer < 10 else arcade.color.GREEN
+        arcade.draw_text(f"⏱ Время: {self.board.timer:.1f}", SCREEN_WIDTH - 150, SCREEN_HEIGHT - 25,
+                        timer_color, font_size=20, bold=True)
+
         # Подсказка управления звуком
         music_status = "🔊" if self.music_enabled else "🔇"
         arcade.draw_text(f"{music_status} M — музыка", 25, 25,
@@ -563,6 +577,14 @@ class GameView(arcade.View):
             self.board.tiles.update(delta_time)
             self.board.tiles.update_animation(delta_time)
             self.board._try_finish_move()
+            # Уменьшаем таймер
+            self.board.timer -= delta_time
+            # Проверка на истечение времени
+            if self.board.timer <= 0:
+                self.board.timer = 0
+                self.board.game_over = True
+                if _game_view_ref:
+                    _game_view_ref._play_sound("lose", volume=0.6)
 
     def on_key_press(self, key, modifiers):
         # 🔇 Управление музыкой
